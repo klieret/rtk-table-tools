@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # std
-from typing import List, Union
+from typing import List, Union, Optional
 from pathlib import PurePath, Path
 
 # 3rd
@@ -10,10 +10,16 @@ import numpy as np
 
 
 class KanjiCollection(object):
-    def __init__(self, path: Union[str, PurePath], edition=6):
+    def __init__(self,
+                 path: Union[str, PurePath],
+                 tangorin_path: Optional[Union[str, PurePath]] = None,
+                 edition=6):
         path = Path(path)
+        tangorin_path = Path(tangorin_path)
         self.edition = edition
         self.df = self._read(path)
+        if tangorin_path:
+            self._read_tangorin(tangorin_path)
 
     def _read(self, path: Path) -> pd.DataFrame:
         with path.open("r") as csvfile:
@@ -29,6 +35,14 @@ class KanjiCollection(object):
         df["kun_reading"] = df["kun_reading"].str.split(";")
         df["utf"] = df["kanji"].apply(lambda x: "u" + hex(ord(x))[2:])
         return df
+
+    def _read_tangorin(self, path: Path):
+        with path.open("r") as csvfile:
+            df = pd.read_csv(csvfile, comment="#")
+        # self.df["ord"] = self.df["kanji"].apply(ord)
+        self.df = self.df.merge(df, left_on="kanji", right_on="kanji")
+        self.df["jlpt"].fillna(0, inplace=True)
+        self.df["jlpt"] = self.df["jlpt"].astype(np.int8)
 
     def __iter__(self):
         return self.df.itertuples()

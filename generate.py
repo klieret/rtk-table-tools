@@ -2,6 +2,7 @@
 
 # std
 import argparse
+from pathlib import Path
 
 # ours
 from rtktools.kanjicollection import KanjiCollection
@@ -10,19 +11,31 @@ from rtktools.scraper.tangorin.scraper import TangorinScraper
 from rtktools.poster import KanjiPoster
 
 
+# todo: remove absolute paths!
+def get_kanji_collection():
+    tangorin_path = None
+    tangorin_path_conjecture = "scrape/tangorin.csv"
+    if Path(tangorin_path_conjecture).is_file():
+        tangorin_path = tangorin_path_conjecture
+    return KanjiCollection(
+        path="data/kanjis.csv",
+        tangorin_path=tangorin_path
+    )
+
+
 def usage(args):
     print("Use --help to show usage!")
 
 
 def poster(args):
-    k = KanjiCollection("data/kanjis.csv")
+    k = get_kanji_collection()
     p = KanjiPoster(k)
     with open("build/table.tex", "w") as outfile:
         outfile.write(p.generate())
 
 
 def scrape(args):
-    k = KanjiCollection("data/kanjis.csv")
+    k = get_kanji_collection()
     ts = TangorinScraper()
     ts.download_kanjis(k.kanjis)
 

@@ -8,6 +8,7 @@ import collections
 # 3rd
 from bs4 import BeautifulSoup
 from tqdm.auto import tqdm
+import pandas as pd
 
 
 class TangorinParser(object):
@@ -34,13 +35,15 @@ class TangorinParser(object):
         out_dct = {}
         renames = {
             "jlpt": "jlpt",
-            "k": "kanji"
+            "k": "kanji",
+            "freq": "freq"
         }
         for old, new in renames.items():
             try:
                 out_dct[new] = dct[old]
             except KeyError:
                 out_dct[new] = None
+        out_dct["ord"] = int(path.name.replace(".html", ""))
         return out_dct
 
     def parse_dir(self, folder):
