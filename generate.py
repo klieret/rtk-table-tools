@@ -13,14 +13,16 @@ from rtktools.scraper.tangorin.scraper import TangorinScraper
 from rtktools.poster import KanjiPoster
 
 
-# todo: remove absolute paths!
+THIS_DIR = Path(__file__).parent
+
+
 def get_kanji_collection():
     tangorin_path = None
-    tangorin_path_conjecture = "scrape/tangorin.csv"
+    tangorin_path_conjecture = THIS_DIR / "scrape" / "tangorin.csv"
     if Path(tangorin_path_conjecture).is_file():
         tangorin_path = tangorin_path_conjecture
     return KanjiCollection(
-        path="data/kanjis.csv",
+        path=THIS_DIR / "data" / "kanjis.csv",
         tangorin_path=tangorin_path
     )
 
@@ -40,7 +42,7 @@ def poster(args):
     outpath = "build/table.tex"
     p.generate(path=outpath)
     if not args.no_render:
-        latex_render_table("main.tex")
+        latex_render_table(THIS_DIR / "main.tex")
 
 
 def scrape(args):
@@ -51,7 +53,7 @@ def scrape(args):
 
 def parse(args):
     tp = TangorinParser()
-    tp.save2csv(tp.parse_dir("scrape/raw/"))
+    tp.save2csv(tp.parse_dir(THIS_DIR / "scrape" / "raw/"))
 
 
 def cli():
