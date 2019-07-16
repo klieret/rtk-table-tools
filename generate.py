@@ -39,7 +39,8 @@ def poster(args):
     p = KanjiPoster(k)
     outpath = "build/table.tex"
     p.generate(path=outpath)
-    latex_render_table("main.tex")
+    if not args.no_render:
+        latex_render_table("main.tex")
 
 
 def scrape(args):
@@ -60,6 +61,12 @@ def cli():
     )
     parser.set_defaults(func=usage)
     poster_parser = subparsers.add_parser("poster")
+    poster_parser.add_argument(
+        "--no-render",
+        action="store_true",
+        default=False,
+        help="Skip XeLaTeX rendering."
+    )
     poster_parser.set_defaults(func=poster)
     scrape_parser = subparsers.add_parser("scrape")
     scrape_parser.set_defaults(func=scrape)
