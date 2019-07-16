@@ -27,15 +27,15 @@ class Kanjis(object):
         df["kun_reading"].fillna("", inplace=True)
         df["on_reading"] = df["on_reading"].str.split(";")
         df["kun_reading"] = df["kun_reading"].str.split(";")
+        df["utf"] = df["kanji"].apply(lambda x: "u" + hex(ord(x))[2:])
         return df
+
+    def __iter__(self):
+        return self.df.itertuples()
 
     @property
     def kanjis(self) -> List[str]:
         return self.df["kanji"].values.tolist()
-
-    @property
-    def ids(self) -> List[str]:
-        return self.df["id"].values.tolist()
 
 
 class LatexKanjiTable(object):
@@ -60,8 +60,8 @@ class LatexKanjiTable(object):
         r = "\\begin{{minipage}}{{{}}}".format(self.cell_width) + "\n"
         r += r"\centering" + "\n"
         r += "\\vspace{{{}}}\n".format(self.vadd)
-        r += r"{\Huge " + content[0] + r"}"
-        r += "\\\\[0.3ex]\n" + str(content[1]) + "\n"
+        r += r"{\Huge " + content.kanji + r"}"
+        r += "\\\\[0.3ex]\n" + str(content.id) + "\n"
         r += "\\vspace{{{}}}\n".format(self.vadd)
         r += r"\end{minipage}" + "\n"
         return r
@@ -74,8 +74,7 @@ class LatexKanjiTable(object):
 
     def generate(self):
         out = self._begin_table()
-        content = zip(self.k.kanjis, self.k.ids)
-        for i, cell in enumerate(content):
+        for i, cell in enumerate(self.k):
             icol = i % self.ncols
             out += self._cell(cell, icol)
         out += "\n"
