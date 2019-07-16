@@ -1,5 +1,9 @@
 #!/usr/bin/env ptyhon3
 
+# std
+from pathlib import Path, PurePath
+from typing import Union, Optional
+
 # 3rd
 import numpy as np
 
@@ -20,24 +24,25 @@ class KanjiPoster(object):
             5: "007F51"
         }
 
-    def _get_color(self, kanji):
+    def _get_color(self, kanji) -> str:
         return self.jlpt_colors[kanji.jlpt]
 
-    def _begin_table(self):
+    def _begin_table(self) -> str:
         cols_str = "|" + "c|" * self.ncols
         return "\\begin{{longtable}}{{{cols}}}\n" \
                "\\hline\n".format(cols=cols_str)
 
-    def _end_table(self):
+    @staticmethod
+    def _end_table() -> str:
         return r"\end{longtable}" + "\n"
 
-    def _format_cell_content(self, content):
+    def _format_cell_content(self, kanji):
         jlpt_str = ""
-        if int(content.jlpt) > 0:
-            jlpt_str = "JLPT{}".format(content.jlpt)
+        if int(kanji.jlpt) > 0:
+            jlpt_str = "JLPT{}".format(kanji.jlpt)
         freq_str = ""
-        if not np.isnan(content.freq) and int(content.freq):
-            freq_str = "\\#{}".format(int(content.freq))
+        if not np.isnan(kanji.freq) and int(kanji.freq):
+            freq_str = "\\#{}".format(int(kanji.freq))
         return "\\begin{{minipage}}{{{width}}}\n" \
                "\\centering\n" \
                "\\color[HTML]{{{color}}}" \
@@ -50,25 +55,30 @@ class KanjiPoster(object):
                "\\end{{minipage}}\n".format(
             width=self.cell_width,
             vadd=self.vadd,
-            kanji=content.kanji,
-            id=content.id,
-            utf=content.utf,
-            color=self._get_color(content),
+            kanji=kanji.kanji,
+            id=kanji.id,
+            utf=kanji.utf,
+            color=self._get_color(kanji),
             jlpt_str=jlpt_str,
             freq_str=freq_str
         )
 
-    def _cell(self, content, icol):
+    def _cell(self, content, icol: int) -> str:
         if icol < self.ncols - 1:
             return self._format_cell_content(content) + "&"
         else:
             return self._format_cell_content(content) + "\\\\ \\hline"
 
-    def generate(self):
+    def generate(self, path: Optional[Union[str, PurePath]] = None) -> str:
+        if path is not None:
+            path = Path(path)
         out = self._begin_table()
         for i, cell in enumerate(self.k):
             icol = i % self.ncols
             out += self._cell(cell, icol)
         out += "\n"
         out += self._end_table()
+        if path is not None:
+            with path.open("w") as outfile:
+                outfile.write(out)
         return out

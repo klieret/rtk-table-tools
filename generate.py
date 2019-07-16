@@ -2,7 +2,9 @@
 
 # std
 import argparse
-from pathlib import Path
+from pathlib import Path, PurePath
+from typing import Union
+from subprocess import Popen
 
 # ours
 from rtktools.kanjicollection import KanjiCollection
@@ -27,11 +29,17 @@ def usage(args):
     print("Use --help to show usage!")
 
 
+def latex_render_table(path: Union[str, PurePath]) -> None:
+    path = str(path)
+    Popen(["xelatex", "--output-directory=build", path]).communicate()
+
+
 def poster(args):
     k = get_kanji_collection()
     p = KanjiPoster(k)
-    with open("build/table.tex", "w") as outfile:
-        outfile.write(p.generate())
+    outpath = "build/table.tex"
+    p.generate(path=outpath)
+    latex_render_table("main.tex")
 
 
 def scrape(args):
