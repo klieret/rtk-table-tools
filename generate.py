@@ -10,7 +10,7 @@ from subprocess import Popen
 from rtktools.kanjicollection import KanjiCollection
 from rtktools.scraper.tangorin.parser import TangorinParser
 from rtktools.scraper.tangorin.scraper import TangorinScraper
-from rtktools.poster import KanjiPoster
+from rtktools.poster import *
 
 
 THIS_DIR = Path(__file__).parent
@@ -38,7 +38,7 @@ def latex_render_table(path: Union[str, PurePath]) -> None:
 
 def poster(args):
     k = get_kanji_collection()
-    p = KanjiPoster(k)
+    p = MinimalistKanjiPoster(k)
     outpath = "build/table.tex"
     p.generate(path=outpath)
     if not args.no_render:

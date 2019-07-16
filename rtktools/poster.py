@@ -3,18 +3,51 @@
 # std
 from pathlib import Path, PurePath
 from typing import Union, Optional
+from abc import ABC, abstractmethod
 
 # 3rd
 import numpy as np
 
 
-class KanjiPoster(object):
+class AbstractKanjiPoster(ABC):
     def __init__(self, k):
-        self.ncols = 8
-        self.nrows = 10
         self.k = k
+        self.ncols = 8
+
+    @abstractmethod
+    def _begin_table(self) -> str:
+        pass
+
+    @abstractmethod
+    def _end_table(self) -> str:
+        pass
+
+    @abstractmethod
+    def _format_cell(self, cell, icol: int) -> str:
+        pass
+
+    def generate(self, path: Optional[Union[str, PurePath]] = None) -> str:
+        if path is not None:
+            path = Path(path)
+        out = self._begin_table()
+        for i, cell in enumerate(self.k):
+            icol = i % self.ncols
+            out += self._format_cell(cell, icol)
+        out += "\n"
+        out += self._end_table()
+        if path is not None:
+            with path.open("w") as outfile:
+                outfile.write(out)
+        return out
+
+
+class DefaultKanjiPoster(AbstractKanjiPoster):
+    def __init__(self, k):
+        super().__init__(k)
+        self.nrows = 10
         self.cell_width = "2.5cm"
         self.vadd = "0.3cm"
+        self.grid = False
         self.jlpt_colors = {
             0: "D8102C",
             1: "831378",
@@ -28,57 +61,67 @@ class KanjiPoster(object):
         return self.jlpt_colors[kanji.jlpt]
 
     def _begin_table(self) -> str:
-        cols_str = "|" + "c|" * self.ncols
+        col_line = ""
+        row_line = ""
+        if self.grid:
+            col_line = "|"
+            row_line = "\\hline"
+        cols_str = col_line + ("c" + col_line) * self.ncols
         return "\\begin{{longtable}}{{{cols}}}\n" \
-               "\\hline\n".format(cols=cols_str)
+               "{row_line}\n".format(cols=cols_str, row_line=row_line)
 
-    @staticmethod
-    def _end_table() -> str:
+    def _end_table(self) -> str:
         return r"\end{longtable}" + "\n"
 
-    def _format_cell_content(self, kanji):
+    def _format_kanji_header(self, kanji):
         jlpt_str = ""
         if int(kanji.jlpt) > 0:
             jlpt_str = "JLPT{}".format(kanji.jlpt)
         freq_str = ""
         if not np.isnan(kanji.freq) and int(kanji.freq):
             freq_str = "\\#{}".format(int(kanji.freq))
+        return "{jlpt_str} {freq_str} $\ \!\!\!$\\\\ \n".format(
+            jlpt_str=jlpt_str, freq_str=freq_str
+        )
+
+    def _format_kanji_footer(self, kanji):
+        return "\\\\[0.3ex]\n{id} {utf}\n".format(
+            id=kanji.id, utf=kanji.utf
+        )
+
+    def _format_kanji(self, kanji):
+        return "{{\\Huge {kanji} }}\n".format(kanji=kanji.kanji)
+
+    def _format_cell_content(self, kanji):
+
         return "\\begin{{minipage}}{{{width}}}\n" \
                "\\centering\n" \
                "\\color[HTML]{{{color}}}" \
                "\\vspace{{{vadd}}}\n" \
-               "{jlpt_str} {freq_str} $\ \!\!\!$\\\\ \n" \
-               "{{\\Huge {kanji} }}\n" \
-               "\\\\[0.3ex]\n" \
-               "{id} {utf}\n" \
+               "{kanji_header}{kanji}{kanji_footer}" \
                "\\vspace{{{vadd}}}\n" \
                "\\end{{minipage}}\n".format(
             width=self.cell_width,
             vadd=self.vadd,
-            kanji=kanji.kanji,
-            id=kanji.id,
-            utf=kanji.utf,
             color=self._get_color(kanji),
-            jlpt_str=jlpt_str,
-            freq_str=freq_str
+            kanji_header=self._format_kanji_header(kanji),
+            kanji_footer=self._format_kanji_footer(kanji),
+            kanji=self._format_kanji(kanji)
         )
 
-    def _cell(self, content, icol: int) -> str:
+    def _format_cell(self, content, icol: int) -> str:
         if icol < self.ncols - 1:
             return self._format_cell_content(content) + "&"
         else:
-            return self._format_cell_content(content) + "\\\\ \\hline"
+            line = ""
+            if self.grid:
+                line = "\\hline"
+            return self._format_cell_content(content) + "\\\\ " + line
 
-    def generate(self, path: Optional[Union[str, PurePath]] = None) -> str:
-        if path is not None:
-            path = Path(path)
-        out = self._begin_table()
-        for i, cell in enumerate(self.k):
-            icol = i % self.ncols
-            out += self._cell(cell, icol)
-        out += "\n"
-        out += self._end_table()
-        if path is not None:
-            with path.open("w") as outfile:
-                outfile.write(out)
-        return out
+
+class MinimalistKanjiPoster(DefaultKanjiPoster):
+    def _format_kanji_footer(self, kanji):
+        return ""
+
+    def _format_kanji_header(self, kanji):
+        return ""
