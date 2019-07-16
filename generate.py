@@ -47,24 +47,27 @@ class LatexKanjiTable(object):
         self.vadd = "0.3cm"
 
     def _begin_table(self):
-        r = r"\begin{longtable}{|" + "c|" * self.ncols + r"}" + "\n"
-        r += "\\hline\n"
-        return r
+        cols_str = "|" + "c|" * self.ncols
+        return "\\begin{{longtable}}{{{cols}}}\n" \
+               "\\hline\n".format(cols=cols_str)
 
     def _end_table(self):
-        # r = "\\hline\n"
-        r = r"\end{longtable}" + "\n"
-        return r
+        return r"\end{longtable}" + "\n"
 
     def _format_cell_content(self, content):
-        r = "\\begin{{minipage}}{{{}}}".format(self.cell_width) + "\n"
-        r += r"\centering" + "\n"
-        r += "\\vspace{{{}}}\n".format(self.vadd)
-        r += r"{\Huge " + content.kanji + r"}"
-        r += "\\\\[0.3ex]\n" + str(content.id) + "\n"
-        r += "\\vspace{{{}}}\n".format(self.vadd)
-        r += r"\end{minipage}" + "\n"
-        return r
+        return "\\begin{{minipage}}{{{width}}}\n" \
+               "\\centering\n" \
+               "\\vspace{{{vadd}}}\n" \
+               "{{\Huge {kanji} }}\n" \
+               "\\\\[0.3ex]\n" \
+               "{id}\n" \
+               "\\vspace{{{vadd}}}\n" \
+               "\\end{{minipage}}\n".format(
+            width=self.cell_width,
+            vadd=self.vadd,
+            kanji=content.kanji,
+            id=content.id
+        )
 
     def _cell(self, content, icol):
         if icol < self.ncols - 1:
