@@ -86,7 +86,7 @@ class DefaultKanjiPoster(AbstractKanjiPoster):
 
     def _format_kanji_footer(self, kanji):
         return "\\\\[0.3ex]\n{id} {utf}\n".format(
-            id=kanji.id, utf=kanji.utf
+            id=kanji.heisig_id, utf=kanji.utf
         )
 
     def _format_kanji(self, kanji):
@@ -125,7 +125,6 @@ class MinimalistKanjiPoster(DefaultKanjiPoster):
 
     def _format_kanji_header(self, kanji):
         return ""
-
 
 
 _name2class = {

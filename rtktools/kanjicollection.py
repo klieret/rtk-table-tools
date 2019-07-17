@@ -13,10 +13,10 @@ class KanjiCollection(object):
     def __init__(self,
                  path: Union[str, PurePath],
                  tangorin_path: Optional[Union[str, PurePath]] = None,
-                 edition=6):
+                 heisig_edition=6):
         path = Path(path)
         tangorin_path = Path(tangorin_path)
-        self.edition = edition
+        self.edition = heisig_edition
         self.df = self._read(path)
         if tangorin_path:
             self._read_tangorin(tangorin_path)
@@ -24,9 +24,9 @@ class KanjiCollection(object):
     def _read(self, path: Path) -> pd.DataFrame:
         with path.open("r") as csvfile:
             df = pd.read_csv(csvfile, comment="#")
-        df["id"] = df["id_{}th_ed".format(self.edition)]
-        df["id"].fillna(0, inplace=True)
-        df["id"] = df["id"].astype(np.int16)
+        df["heisig_id"] = df["id_{}th_ed".format(self.edition)]
+        df["heisig_id"].fillna(0, inplace=True)
+        df["heisig_id"] = df["heisig_id"].astype(np.int16)
         df.drop(columns=["id_5th_ed", "id_6th_ed"], inplace=True)
         df["components"].fillna("", inplace=True)
         df["on_reading"].fillna("", inplace=True)
