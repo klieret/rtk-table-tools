@@ -2,7 +2,7 @@
 
 # std
 from pathlib import Path, PurePath
-from typing import Union, Optional
+from typing import Union, Optional, List
 from abc import ABC, abstractmethod
 
 # 3rd
@@ -47,7 +47,7 @@ class DefaultKanjiPoster(AbstractKanjiPoster):
         self.nrows = 10
         self.cell_width = "2.5cm"
         self.vadd = "0.3cm"
-        self.grid = False
+        self.grid = True
         self.jlpt_colors = {
             0: "D8102C",
             1: "831378",
@@ -125,3 +125,18 @@ class MinimalistKanjiPoster(DefaultKanjiPoster):
 
     def _format_kanji_header(self, kanji):
         return ""
+
+
+
+_name2class = {
+    "default": DefaultKanjiPoster,
+    "minimalist": MinimalistKanjiPoster
+}
+
+
+def poster_by_name(name: str, kanji, **kwargs) -> AbstractKanjiPoster:
+    return _name2class[name](kanji, **kwargs)
+
+
+def get_available_poster_styles() -> List[str]:
+    return sorted(list(_name2class.keys()))

@@ -10,7 +10,7 @@ from subprocess import Popen
 from rtktools.kanjicollection import KanjiCollection
 from rtktools.scraper.tangorin.parser import TangorinParser
 from rtktools.scraper.tangorin.scraper import TangorinScraper
-from rtktools.poster import *
+from rtktools.poster import get_available_poster_styles, poster_by_name
 
 
 THIS_DIR = Path(__file__).parent
@@ -38,7 +38,7 @@ def latex_render_table(path: Union[str, PurePath]) -> None:
 
 def poster(args):
     k = get_kanji_collection()
-    p = MinimalistKanjiPoster(k)
+    p = poster_by_name(args.style, k)
     outpath = "build/table.tex"
     p.generate(path=outpath)
     if not args.no_render:
@@ -62,6 +62,9 @@ def cli():
         title="Subcommands"
     )
     parser.set_defaults(func=usage)
+
+    # Poster CLI
+    # --------------------------------------------------------------------------
     poster_parser = subparsers.add_parser("poster")
     poster_parser.add_argument(
         "--no-render",
@@ -69,11 +72,24 @@ def cli():
         default=False,
         help="Skip XeLaTeX rendering."
     )
+    poster_parser.add_argument(
+        "--style", "-s",
+        default="default",
+        help="Poster style",
+        choices=get_available_poster_styles()
+    )
     poster_parser.set_defaults(func=poster)
+
+    # Scraper CLI
+    # --------------------------------------------------------------------------
     scrape_parser = subparsers.add_parser("scrape")
     scrape_parser.set_defaults(func=scrape)
+
+    # Parser CLI
+    # --------------------------------------------------------------------------
     parser_parser = subparsers.add_parser("parse")
     parser_parser.set_defaults(func=parse)
+
     args = parser.parse_args()
     args.func(args)
 
