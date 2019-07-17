@@ -32,17 +32,17 @@ def usage(args):
 
 
 def latex_render_table(path: Union[str, PurePath]) -> None:
-    path = str(path)
-    Popen(["xelatex", "--output-directory=build", path]).communicate()
+    path = Path(path)
+    Popen(["xelatex", "--output-directory={}".format(path.parent), str(path)]).communicate()
 
 
 def poster(args):
     k = get_kanji_collection()
     p = poster_by_name(args.style, k)
-    outpath = "build/table.tex"
+    outpath = THIS_DIR / "build" / "table.tex"
     p.generate(path=outpath)
     if not args.no_render:
-        latex_render_table(THIS_DIR / "main.tex")
+        latex_render_table(outpath)
 
 
 def scrape(args):

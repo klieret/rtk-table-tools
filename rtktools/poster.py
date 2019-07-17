@@ -15,6 +15,14 @@ class AbstractKanjiPoster(ABC):
         self.ncols = 8
 
     @abstractmethod
+    def _begin_document(self) -> str:
+        pass
+
+    @abstractmethod
+    def _end_document(self) -> str:
+        pass
+
+    @abstractmethod
     def _begin_table(self) -> str:
         pass
 
@@ -29,12 +37,14 @@ class AbstractKanjiPoster(ABC):
     def generate(self, path: Optional[Union[str, PurePath]] = None) -> str:
         if path is not None:
             path = Path(path)
-        out = self._begin_table()
+        out = self._begin_document()
+        out += self._begin_table()
         for i, cell in enumerate(self.k):
             icol = i % self.ncols
             out += self._format_cell(cell, icol)
         out += "\n"
         out += self._end_table()
+        out += self._end_document()
         if path is not None:
             with path.open("w") as outfile:
                 outfile.write(out)
@@ -60,6 +70,21 @@ class DefaultKanjiPoster(AbstractKanjiPoster):
     def _get_color(self, kanji) -> str:
         return self.jlpt_colors[kanji.jlpt]
 
+    def _begin_document(self) -> str:
+        return r"""
+        \documentclass[]{article}
+        \usepackage[margin=2cm,a3paper]{geometry}
+        \usepackage{xeCJK}
+        %\setCJKmainfont{AozoraMinchoRegular.ttf}
+        \usepackage{xcolor}
+        \usepackage{longtable}
+        """
+
+    def _end_document(self) -> str:
+        return r"""
+        \end{document}
+        """
+
     def _begin_table(self) -> str:
         col_line = ""
         row_line = ""
@@ -80,7 +105,7 @@ class DefaultKanjiPoster(AbstractKanjiPoster):
         freq_str = ""
         if not np.isnan(kanji.freq) and int(kanji.freq):
             freq_str = "\\#{}".format(int(kanji.freq))
-        return "{jlpt_str} {freq_str} $\ \!\!\!$\\\\ \n".format(
+        return "{jlpt_str} {freq_str} $\\ \\!\\!\\!$\\\\ \n".format(
             jlpt_str=jlpt_str, freq_str=freq_str
         )
 
