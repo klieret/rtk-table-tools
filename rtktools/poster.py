@@ -4,6 +4,7 @@
 from pathlib import Path, PurePath
 from typing import Union, Optional, List
 from abc import ABC, abstractmethod
+import inspect
 
 # 3rd
 import numpy as np
@@ -12,7 +13,7 @@ import numpy as np
 class AbstractKanjiPoster(ABC):
     def __init__(self, k):
         self.k = k
-        self.ncols = 8
+        self.ncols = 9
 
     @abstractmethod
     def _begin_document(self) -> str:
@@ -71,14 +72,16 @@ class DefaultKanjiPoster(AbstractKanjiPoster):
         return self.jlpt_colors[kanji.jlpt]
 
     def _begin_document(self) -> str:
-        return r"""
+        return inspect.cleandoc(r"""
         \documentclass[]{article}
-        \usepackage[margin=2cm,a3paper]{geometry}
+        \usepackage[margin=1cm,a3paper]{geometry}
         \usepackage{xeCJK}
         %\setCJKmainfont{AozoraMinchoRegular.ttf}
         \usepackage{xcolor}
         \usepackage{longtable}
-        """
+        \pagenumbering{gobble}  % no page numbers
+        \begin{document}
+        """)
 
     def _end_document(self) -> str:
         return r"""
@@ -105,17 +108,17 @@ class DefaultKanjiPoster(AbstractKanjiPoster):
         freq_str = ""
         if not np.isnan(kanji.freq) and int(kanji.freq):
             freq_str = "\\#{}".format(int(kanji.freq))
-        return "{jlpt_str} {freq_str} $\\ \\!\\!\\!$\\\\ \n".format(
+        return "{{ \\footnotesize {jlpt_str} {freq_str} }}$\\ \\!\\!\\!$\\\\ \n".format(
             jlpt_str=jlpt_str, freq_str=freq_str
         )
 
     def _format_kanji_footer(self, kanji):
-        return "\\\\[0.3ex]\n{id} {utf}\n".format(
+        return "\\\\[0.3ex]\n {{ \\footnotesize {id} {utf} }}\n".format(
             id=kanji.heisig_id, utf=kanji.utf
         )
 
     def _format_kanji(self, kanji):
-        return "{{\\Huge {kanji} }}\n".format(kanji=kanji.kanji)
+        return "\\scalebox{{3.5}}{{{kanji}}}\n".format(kanji=kanji.kanji)
 
     def _format_cell_content(self, kanji):
 
