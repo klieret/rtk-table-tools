@@ -47,6 +47,7 @@ class AbstractKanjiPoster(ABC):
         out += self._end_table()
         out += self._end_document()
         if path is not None:
+            path.parent.mkdir(parents=True, exist_ok=True)
             with path.open("w") as outfile:
                 outfile.write(out)
         return out

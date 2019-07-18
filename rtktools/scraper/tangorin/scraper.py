@@ -19,6 +19,7 @@ class TangorinScraper(object):
 
     @staticmethod
     def _download(url: str, path: Path) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
         with path.open("wb") as outfile:
             r = requests.get(url)
             outfile.write(r.content)
