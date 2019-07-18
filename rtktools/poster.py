@@ -50,6 +50,8 @@ class DefaultKanjiPoster(AbstractKanjiPoster):
         for i, cell in enumerate(self.k):
             icol = i % self.ncols
             out += self._format_cell(cell, icol)
+        for icol in range(len(self.k) % self.ncols, self.ncols):
+            out += self._format_cell(None, icol)
         out += "\n"
         out += self._end_table()
         out += self._end_document()
@@ -93,7 +95,7 @@ class DefaultKanjiPoster(AbstractKanjiPoster):
                "{row_line}\n".format(cols=cols_str, row_line=row_line)
 
     def _end_table(self) -> str:
-        return r"\\\hline\end{longtable}" + "\n"
+        return r"\end{longtable}" + "\n"
 
     def _format_kanji_header(self, kanji):
         jlpt_str = ""
