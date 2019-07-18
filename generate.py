@@ -30,6 +30,7 @@ def get_kanji_collection():
     log.info("Loaded Kanji collection with {} kanji.".format(len(kc)))
     return kc
 
+
 def usage(args):
     print("Use --help to show usage!")
 
