@@ -53,6 +53,7 @@ def latex_render_table(path: Union[str, PurePath]) -> None:
 def poster(args):
     k = get_kanji_collection()
     p = poster_by_name(args.style, k)
+    p.set_options(args.options)
     outpath = THIS_DIR / "build" / "table.tex"
     p.generate(path=outpath)
     log.info("Finished generating poster code.")
@@ -92,6 +93,11 @@ def cli():
         default="default",
         help="Poster style",
         choices=get_available_poster_styles()
+    )
+    poster_parser.add_argument(
+        "--options", "-o",
+        nargs="+",
+        help="Set option",
     )
     poster_parser.set_defaults(func=poster)
 

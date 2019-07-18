@@ -2,12 +2,16 @@
 
 # std
 from pathlib import Path, PurePath
-from typing import Union, Optional, List
+from typing import Union, Optional, List, Tuple
 from abc import ABC, abstractmethod
 import inspect
+import collections
 
 # 3rd
 import numpy as np
+
+# ours
+from rtktools.util.log import log
 
 
 class AbstractKanjiPoster(ABC):
@@ -16,6 +20,10 @@ class AbstractKanjiPoster(ABC):
 
     @abstractmethod
     def generate(self, path: Optional[Union[str, PurePath]] = None) -> str:
+        pass
+
+    @abstractmethod
+    def set_options(self, *args):
         pass
 
 
@@ -38,6 +46,18 @@ class DefaultKanjiPoster(AbstractKanjiPoster):
         self.paper_format = "a3paper"
         self.page_margin = "1cm"
         self.ncols = 9
+
+    def set_options(self, options):
+        for option in options:
+            self.set_option(option)
+
+    def set_option(self, option):
+        if option == "no-grid":
+            self.grid = False
+        elif option == "no-colors":
+            self.jlpt_colors = collections.defaultdict(lambda: "000000")
+        else:
+            log.warning("Unknown option '{}'".format(option))
 
     def generate(self, path: Optional[Union[str, PurePath]] = None) -> str:
         if path is not None:
