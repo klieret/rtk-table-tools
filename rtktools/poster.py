@@ -2,7 +2,7 @@
 
 # std
 from pathlib import Path, PurePath
-from typing import Union, Optional, List, Tuple
+from typing import Union, Optional, List
 from abc import ABC, abstractmethod
 import inspect
 import collections
@@ -12,6 +12,7 @@ import numpy as np
 
 # ours
 from rtktools.util.log import log
+from rtktools.latex import LatexTableDocument
 
 
 class AbstractKanjiPoster(ABC):
@@ -27,9 +28,10 @@ class AbstractKanjiPoster(ABC):
         pass
 
 
-class DefaultKanjiPoster(AbstractKanjiPoster):
+class DefaultKanjiPoster(AbstractKanjiPoster, LatexTableDocument):
     def __init__(self, k):
-        super().__init__(k)
+        AbstractKanjiPoster.__init__(self, k)
+        LatexTableDocument.__init__(self)
         self.cell_width = "2.5cm"
         self.vadd = "0.3cm"
         self.grid = True
@@ -46,6 +48,14 @@ class DefaultKanjiPoster(AbstractKanjiPoster):
         self.paper_format = "a3paper"
         self.page_margin = "1cm"
         self.ncols = 9
+        self.grid = True
+
+
+    def _get_contents(self):
+        return self.k
+
+    def generate(self, path: Optional[Union[str, PurePath]] = None):
+        LatexTableDocument.generate(self, path)
 
     def set_options(self, options):
         for option in options:
@@ -59,60 +69,9 @@ class DefaultKanjiPoster(AbstractKanjiPoster):
         else:
             log.warning("Unknown option '{}'".format(option))
 
-    def generate(self, path: Optional[Union[str, PurePath]] = None) -> str:
-        if path is not None:
-            path = Path(path)
-        out = self._begin_document()
-        out += self._begin_table()
-        for i, cell in enumerate(self.k):
-            icol = i % self.ncols
-            out += self._format_cell(cell, icol)
-        for icol in range(len(self.k) % self.ncols, self.ncols):
-            out += self._format_cell(None, icol)
-        out += "\n"
-        out += self._end_table()
-        out += self._end_document()
-        if path is not None:
-            path.parent.mkdir(parents=True, exist_ok=True)
-            with path.open("w") as outfile:
-                outfile.write(out)
-        return out
 
     def _get_color(self, kanji) -> str:
         return self.jlpt_colors[kanji.jlpt]
-
-    def _begin_document(self) -> str:
-        return inspect.cleandoc("""
-        \\documentclass[]{{article}}
-        \\usepackage[margin={margin},{paper}]{{geometry}}
-        \\usepackage{{xeCJK}}
-        \\setCJKmainfont[BoldFont=AozoraMincho-bold,AutoFakeSlant=0.15]{{Aozora Mincho}}
-        \\usepackage{{xcolor}}
-        \\usepackage{{longtable}}
-        \\pagenumbering{{gobble}}  % no page numbers
-        \\begin{{document}}
-        """.format(
-            paper=self.paper_format,
-            margin=self.page_margin
-        ))
-
-    def _end_document(self) -> str:
-        return r"""
-        \end{document}
-        """
-
-    def _begin_table(self) -> str:
-        col_line = ""
-        row_line = ""
-        if self.grid:
-            col_line = "|"
-            row_line = "\\hline"
-        cols_str = col_line + ("c" + col_line) * self.ncols
-        return "\\begin{{longtable}}{{{cols}}}\n" \
-               "{row_line}\n".format(cols=cols_str, row_line=row_line)
-
-    def _end_table(self) -> str:
-        return r"\end{longtable}" + "\n"
 
     def _format_kanji_header(self, kanji):
         jlpt_str = ""

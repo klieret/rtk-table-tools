@@ -98,6 +98,7 @@ def cli():
         "--options", "-o",
         nargs="+",
         help="Set option",
+        default=[]
     )
     poster_parser.set_defaults(func=poster)
 
