@@ -9,9 +9,6 @@ import inspect
 # 3rd
 import numpy as np
 
-# ours
-from rtktools.util.log import log
-
 
 class AbstractKanjiPoster(ABC):
     def __init__(self, k):
@@ -154,7 +151,7 @@ class DefaultKanjiPoster(AbstractKanjiPoster):
             return self._format_cell_content(content) + "\\\\ " + line
 
 
-class DefaultSmallKanjiPoster(DefaultKanjiPoster):
+class SmallKanjiPoster(DefaultKanjiPoster):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.ncols = 15
@@ -172,6 +169,13 @@ class DefaultSmallKanjiPoster(DefaultKanjiPoster):
         )
 
 
+class SmallA4KanjiPoster(SmallKanjiPoster):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.paper_format = "a4paper"
+        self.ncols = 10
+
+
 class DefaultA4KanjiPoster(DefaultKanjiPoster):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -187,11 +191,27 @@ class MinimalistKanjiPoster(DefaultKanjiPoster):
         return ""
 
 
+class MinimalistA4KanjiPoster(MinimalistKanjiPoster, DefaultA4KanjiPoster):
+    pass
+
+
+class MinimalistSmallKanjiPoster(MinimalistKanjiPoster, SmallKanjiPoster):
+    pass
+
+
+class MinimalistSmallA4KanjiPoster(MinimalistKanjiPoster, SmallA4KanjiPoster):
+    pass
+
+
 _name2class = {
     "default": DefaultKanjiPoster,
-    "small": DefaultSmallKanjiPoster,
-    "defaulta4": DefaultA4KanjiPoster,
-    "minimalist": MinimalistKanjiPoster
+    "small": SmallKanjiPoster,
+    "small-a4": SmallA4KanjiPoster,
+    "default-a4": DefaultA4KanjiPoster,
+    "minimalist": MinimalistKanjiPoster,
+    "minimalist-a4": MinimalistA4KanjiPoster,
+    "minimalist-small": MinimalistSmallKanjiPoster,
+    "minimalist-small-a4": MinimalistSmallA4KanjiPoster
 }
 
 
