@@ -39,7 +39,12 @@ def latex_render_table(path: Union[str, PurePath]) -> None:
     log.info("Rendering using XeLaTeX. Output files and "
              "logs are in directory {}.".format(path.parent))
     Popen(
-        ["xelatex", "--output-directory={}".format(path.parent), str(path)],
+        [
+            "xelatex",
+            "--output-directory={}".format(path.parent),
+            "-interaction=nonstopmode",
+            str(path)
+        ],
         stdout=open(os.devnull, 'w')
     ).communicate()
 

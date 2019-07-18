@@ -121,28 +121,32 @@ class DefaultKanjiPoster(AbstractKanjiPoster):
         )
 
     def _format_kanji(self, kanji):
-        return "\\begin{{minipage}}[c][{dim}][c]{{{dim}}}\\centering\\scalebox{{{scale}}}{{{kanji}}}\\end{{minipage}}\n".format(
+        return inspect.cleandoc("""\\begin{{minipage}}[c][{dim}][c]{{{dim}}}
+            \\centering
+            \\scalebox{{{scale}}}{{{kanji}}}
+            \\end{{minipage}}\n""".format(
             kanji=kanji.kanji,
             scale=self.kanji_scale,
             dim=self.kanji_box_width_height
-        )
+        ))
 
     def _format_cell_content(self, kanji):
 
-        return "\\begin{{minipage}}{{{width}}}\n" \
-               "\\centering\n" \
-               "\\color[HTML]{{{color}}}" \
-               "\\vspace{{{vadd}}}\n" \
-               "{kanji_header}{kanji}{kanji_footer}" \
-               "\\vspace{{{vadd}}}\n" \
-               "\\end{{minipage}}\n".format(
+        return inspect.cleandoc("""\\begin{{minipage}}{{{width}}}\n
+            \\centering\n
+            \\color[HTML]{{{color}}}\\vspace{{{vadd}}}\n
+            {kanji_header}
+            {kanji}
+            {kanji_footer}
+            \\vspace{{{vadd}}}\n
+            \\end{{minipage}}\n""".format(
             width=self.cell_width,
             vadd=self.vadd,
             color=self._get_color(kanji),
             kanji_header=self._format_kanji_header(kanji),
             kanji_footer=self._format_kanji_footer(kanji),
             kanji=self._format_kanji(kanji)
-        )
+        ))
 
     def _format_cell(self, content, icol: int) -> str:
         if icol < self.ncols - 1:
