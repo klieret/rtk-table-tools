@@ -5,12 +5,14 @@ import argparse
 from pathlib import Path, PurePath
 from typing import Union
 from subprocess import Popen
+import os
 
 # ours
 from rtktools.kanjicollection import KanjiCollection
 from rtktools.scraper.tangorin.parser import TangorinParser
 from rtktools.scraper.tangorin.scraper import TangorinScraper
 from rtktools.poster import get_available_poster_styles, poster_by_name
+from rtktools.util.log import log
 
 
 THIS_DIR = Path(__file__).parent
@@ -21,11 +23,12 @@ def get_kanji_collection():
     tangorin_path_conjecture = THIS_DIR / "scrape" / "tangorin.csv"
     if Path(tangorin_path_conjecture).is_file():
         tangorin_path = tangorin_path_conjecture
-    return KanjiCollection(
+    kc = KanjiCollection(
         path=THIS_DIR / "data" / "kanjis.csv",
         tangorin_path=tangorin_path
     )
-
+    log.info("Loaded Kanji collection with {} kanji.".format(len(kc)))
+    return kc
 
 def usage(args):
     print("Use --help to show usage!")
@@ -33,7 +36,12 @@ def usage(args):
 
 def latex_render_table(path: Union[str, PurePath]) -> None:
     path = Path(path)
-    Popen(["xelatex", "--output-directory={}".format(path.parent), str(path)]).communicate()
+    log.info("Rendering using XeLaTeX. Output files and "
+             "logs are in directory {}.".format(path.parent))
+    Popen(
+        ["xelatex", "--output-directory={}".format(path.parent), str(path)],
+        stdout=open(os.devnull, 'w')
+    ).communicate()
 
 
 def poster(args):
@@ -41,6 +49,7 @@ def poster(args):
     p = poster_by_name(args.style, k)
     outpath = THIS_DIR / "build" / "table.tex"
     p.generate(path=outpath)
+    log.info("Finished generating poster code.")
     if not args.no_render:
         latex_render_table(outpath)
 

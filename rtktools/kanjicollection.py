@@ -21,6 +21,9 @@ class KanjiCollection(object):
         if tangorin_path:
             self._read_tangorin(tangorin_path)
 
+    def __len__(self):
+        return len(self.df)
+
     def _read(self, path: Path) -> pd.DataFrame:
         with path.open("r") as csvfile:
             df = pd.read_csv(csvfile, comment="#")
