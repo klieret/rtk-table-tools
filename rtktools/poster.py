@@ -68,6 +68,8 @@ class DefaultKanjiPoster(AbstractKanjiPoster):
             4: "007F51",
             5: "007F51"
         }
+        self.kanji_scale = 6
+        self.kanji_box_width_height = "2.1cm"
 
     def _get_color(self, kanji) -> str:
         return self.jlpt_colors[kanji.jlpt]
@@ -109,17 +111,21 @@ class DefaultKanjiPoster(AbstractKanjiPoster):
         freq_str = ""
         if not np.isnan(kanji.freq) and int(kanji.freq):
             freq_str = "\\#{}".format(int(kanji.freq))
-        return "{{ \\footnotesize {jlpt_str} {freq_str} }}$\\ \\!\\!\\!$\\\\ \n".format(
+        return "{{ \\small {jlpt_str} {freq_str} }}$\\ \\!\\!\\!$\\\\ \n".format(
             jlpt_str=jlpt_str, freq_str=freq_str
         )
 
     def _format_kanji_footer(self, kanji):
-        return "\\\\[0.3ex]\n {{ \\footnotesize {id} {utf} }}\n".format(
+        return "\\\\[0.3ex]\n {{ \\small {id} {utf} }}\n".format(
             id=kanji.heisig_id, utf=kanji.utf
         )
 
     def _format_kanji(self, kanji):
-        return "\\scalebox{{3.5}}{{{kanji}}}\n".format(kanji=kanji.kanji)
+        return "\\begin{{minipage}}[c][{dim}][c]{{{dim}}}\\centering\\scalebox{{{scale}}}{{{kanji}}}\\end{{minipage}}\n".format(
+            kanji=kanji.kanji,
+            scale=self.kanji_scale,
+            dim=self.kanji_box_width_height
+        )
 
     def _format_cell_content(self, kanji):
 
