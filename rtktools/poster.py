@@ -77,7 +77,7 @@ class DefaultKanjiPoster(AbstractKanjiPoster):
         \documentclass[]{article}
         \usepackage[margin=1cm,a3paper]{geometry}
         \usepackage{xeCJK}
-        %\setCJKmainfont{AozoraMinchoRegular.ttf}
+        \setCJKmainfont[BoldFont=AozoraMincho-bold,AutoFakeSlant=0.15]{Aozora Mincho}
         \usepackage{xcolor}
         \usepackage{longtable}
         \pagenumbering{gobble}  % no page numbers
