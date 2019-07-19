@@ -7,7 +7,7 @@ from pathlib import PurePath
 
 # ours
 from rtktools.util.log import log
-from rtktools.latex import LatexTableDocument
+from rtktools.latex import LatexVerticalTableDocument
 
 
 class AbstractSolutions(ABC):
@@ -23,12 +23,14 @@ class AbstractSolutions(ABC):
         pass
 
 
-class DefaultSolutions(LatexTableDocument, AbstractSolutions):
+class DefaultSolutions(LatexVerticalTableDocument, AbstractSolutions):
     def __init__(self, k):
         AbstractSolutions.__init__(self, k)
-        LatexTableDocument.__init__(self)
+        LatexVerticalTableDocument.__init__(self)
         self.cell_width = "4cm"
+        self.cell_height = "6ex"
         self.ncols = 6
+        self.nrows = 42
 
     def _get_contents(self):
         return self.k
@@ -43,13 +45,14 @@ class DefaultSolutions(LatexTableDocument, AbstractSolutions):
     def _format_cell_content(self, kanji):
         if kanji is None:
             return ""
-        return """\\begin{{minipage}}{{{width}}}\n
+        return """\\begin{{minipage}}[t][{height}][t]{{{width}}}\n
             {id} ({kanji}): {keyword}\n
             \\end{{minipage}}""".format(
             id=kanji.heisig_id,
             kanji=kanji.kanji,
             keyword=kanji.keyword,
-            width=self.cell_width
+            width=self.cell_width,
+            height=self.cell_height
         )
 
 

@@ -5,6 +5,7 @@ from typing import Optional, Union
 from pathlib import PurePath, Path
 import inspect
 from abc import abstractmethod, ABC
+from math import ceil
 
 
 class LatexDocument(ABC):
@@ -96,3 +97,26 @@ class LatexTableDocument(LatexDocument):
             if self.grid:
                 line = "\\hline"
             return self._format_cell_content(content) + "\\\\ " + line
+
+
+class LatexVerticalTableDocument(LatexTableDocument):
+    def __init__(self):
+        super().__init__()
+        self.nrows = 50
+
+    def _generate_body(self):
+        out = self._begin_table()
+        contents = self._get_contents()
+        npages = ceil(len(contents) / self.ncols / self.nrows)
+
+        for ipage in range(npages):
+            for irow in range(self.nrows):
+                for icol in range(self.ncols):
+                    iitem = ipage * self.nrows * self.ncols + icol * self.nrows + irow
+                    if iitem < len(contents):
+                        out += self._format_cell(contents.df.loc[iitem], icol)
+                    else:
+                        out += self._format_cell(None, icol)
+        out += "\n"
+        out += self._end_table()
+        return out
