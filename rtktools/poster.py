@@ -28,7 +28,7 @@ class AbstractKanjiPoster(ABC):
         pass
 
 
-class DefaultKanjiPoster(AbstractKanjiPoster, LatexTableDocument):
+class DefaultKanjiPoster(LatexTableDocument, AbstractKanjiPoster):
     def __init__(self, k):
         AbstractKanjiPoster.__init__(self, k)
         LatexTableDocument.__init__(self)
@@ -53,9 +53,6 @@ class DefaultKanjiPoster(AbstractKanjiPoster, LatexTableDocument):
 
     def _get_contents(self):
         return self.k
-
-    def generate(self, path: Optional[Union[str, PurePath]] = None):
-        LatexTableDocument.generate(self, path)
 
     def set_options(self, options):
         for option in options:
