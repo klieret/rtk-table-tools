@@ -30,6 +30,8 @@ class KanjiCollection(object):
         df["heisig_id"] = df["id_{}th_ed".format(self.edition)]
         df["heisig_id"].fillna(0, inplace=True)
         df["heisig_id"] = df["heisig_id"].astype(np.int16)
+        df["keyword"] = df["keyword_{}th_ed".format(self.edition)]
+        df.drop(columns=["keyword_5th_ed", "keyword_6th_ed"], inplace=True)
         df.drop(columns=["id_5th_ed", "id_6th_ed"], inplace=True)
         df["components"].fillna("", inplace=True)
         df["on_reading"].fillna("", inplace=True)

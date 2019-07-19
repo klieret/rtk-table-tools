@@ -57,7 +57,7 @@ class LatexTableDocument(LatexDocument):
         self.grid = True
 
     @abstractmethod
-    def _format_cell(self, cell, icol):
+    def _format_cell_content(self, content):
         pass
 
     @abstractmethod
@@ -87,3 +87,12 @@ class LatexTableDocument(LatexDocument):
 
     def _end_table(self) -> str:
         return r"\end{longtable}" + "\n"
+
+    def _format_cell(self, content, icol: int) -> str:
+        if icol < self.ncols - 1:
+            return self._format_cell_content(content) + "&"
+        else:
+            line = ""
+            if self.grid:
+                line = "\\hline"
+            return self._format_cell_content(content) + "\\\\ " + line

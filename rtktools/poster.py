@@ -117,15 +117,6 @@ class DefaultKanjiPoster(LatexTableDocument, AbstractKanjiPoster):
             kanji=self._format_kanji(kanji)
         ))
 
-    def _format_cell(self, content, icol: int) -> str:
-        if icol < self.ncols - 1:
-            return self._format_cell_content(content) + "&"
-        else:
-            line = ""
-            if self.grid:
-                line = "\\hline"
-            return self._format_cell_content(content) + "\\\\ " + line
-
 
 class SmallKanjiPoster(DefaultKanjiPoster):
     def __init__(self, *args, **kwargs):

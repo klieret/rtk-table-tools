@@ -12,6 +12,7 @@ from rtktools.kanjicollection import KanjiCollection
 from rtktools.scraper.tangorin.parser import TangorinParser
 from rtktools.scraper.tangorin.scraper import TangorinScraper
 from rtktools.poster import get_available_poster_styles, poster_by_name
+from rtktools.solutions import get_available_solution_styles, solution_by_name
 from rtktools.util.log import log
 
 
@@ -61,6 +62,17 @@ def poster(args):
         latex_render_table(outpath)
 
 
+def solution(args):
+    k = get_kanji_collection()
+    p = solution_by_name(args.style, k)
+    p.set_options(args.options)
+    outpath = THIS_DIR / "build" / "solution.tex"
+    p.generate(path=outpath)
+    log.info("Finished generating solution code.")
+    if not args.no_render:
+        latex_render_table(outpath)
+
+
 def scrape(args):
     k = get_kanji_collection()
     ts = TangorinScraper()
@@ -101,6 +113,29 @@ def cli():
         default=[]
     )
     poster_parser.set_defaults(func=poster)
+
+    # Solution CLI
+    # --------------------------------------------------------------------------
+    solution_parser = subparsers.add_parser("solution")
+    solution_parser.add_argument(
+        "--no-render",
+        action="store_true",
+        default=False,
+        help="Skip XeLaTeX rendering."
+    )
+    solution_parser.add_argument(
+        "--style", "-s",
+        default="default",
+        help="Poster style",
+        choices=get_available_solution_styles()
+    )
+    solution_parser.add_argument(
+        "--options", "-o",
+        nargs="+",
+        help="Set option",
+        default=[]
+    )
+    solution_parser.set_defaults(func=solution)
 
     # Scraper CLI
     # --------------------------------------------------------------------------
