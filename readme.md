@@ -11,3 +11,7 @@ Python packages:
 Make sure you have xelatex
 
 Make sure you have the ``Aozora Mincho`` font installed.
+
+## License
+
+See `LICENSE.txt`. This package includes data from [heisig-kanjis](https://github.com/sdcr/heisig-kanjis).
